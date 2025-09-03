@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NexCommerce</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; padding: 0;
+            background: #f9f9f9;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .product {
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            padding: 15px;
+            width: 200px;
+            text-align: center;
+        }
+
+        .product img {
+            max-width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .product h3 {
+            font-size: 1.1rem;
+            margin: 10px 0 5px 0;
+        }
+
+        .product p {
+            font-weight: bold;
+            color: #007bff;
+            margin: 0 0 10px 0;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #cart {
+            background: white;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        #cart h2 {
+            margin-top: 0;
+        }
+
+        #cart-items {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+
+        #cart-items li {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        #cart-total {
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mini E-commerce</h1>
+    </header>
+    <main>
+        <section class="products" id="products"></section>
+
+        <section id="cart">
+            <h2>Carrinho</h2>
+            <ul id="cart-items"></ul>
+            <div id="cart-total">Total: R$ 0,00</div>
+        </section>
+    </main>
+
+    <script>
+        const products = [
+            {
+                id: 1,
+                name: "Camiseta Azul",
+                price: 49.90,
+                image: "https://via.placeholder.com/200x150?text=Camiseta+Azul"
+            },
+            {
+                id: 2,
+                name: "Calça Jeans",
+                price: 120.00,
+                image: "https://via.placeholder.com/200x150?text=Calça+Jeans"
+            },
+            {
+                id: 3,
+                name: "Tênis Esportivo",
+                price: 230.50,
+                image: "https://via.placeholder.com/200x150?text=Tênis+Esportivo"
+            },
+            {
+                id: 4,
+                name: "Boné Preto",
+                price: 35.00,
+                image: "https://via.placeholder.com/200x150?text=Boné+Preto"
+            }
+        ];
+
+        const productsContainer = document.getElementById('products');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartTotal = document.getElementById('cart-total');
+
+        let cart = [];
+
+        function formatPrice(price) {
+            return price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function renderProducts() {
+            productsContainer.innerHTML = '';
+
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'product';
+
+                productDiv.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>${formatPrice(product.price)}</p>
+                    <button data-id="${product.id}">Adicionar ao carrinho</button>
+                `;
+
+                productsContainer.appendChild(productDiv);
+            });
+        }
+
+        function renderCart() {
+            cartItemsContainer.innerHTML = '';
+
+            if(cart.length === 0) {
+                cartItemsContainer.innerHTML = '<li>Carrinho vazio.</li>';
+                cartTotal.textContent = 'Total: R$ 0,00';
+                return;
+            }
+
+            let total = 0;
+
+            cart.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.name} x${item.quantity}`;
+                
+                const priceSpan = document.createElement('span');
+                priceSpan.textContent = formatPrice(item.price * item.quantity);
+
+                li.appendChild(priceSpan);
+                cartItemsContainer.appendChild(li);
+
+                total += item.price * item.quantity;
+            });
+
+            cartTotal.textContent = `Total: ${formatPrice(total)}`;
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            if(!product) return;
+
+            const cartItem = cart.find(item => item.id === id);
+
+            if(cartItem) {
+                cartItem.quantity++;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1
+                });
+            }
+
+            renderCart();
+        }
+
+        productsContainer.addEventListener('click', function(e) {
+            if(e.target.tagName === 'BUTTON') {
+                const id = parseInt(e.target.getAttribute('data-id'));
+                addToCart(id);
+            }
+        });
+
+        // Inicializa a página
+        renderProducts();
+        renderCart();
+    </script>
+</body>
+</html>
