@@ -1,236 +1,393 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NexCommerce</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0; padding: 0;
-            background: #f9f9f9;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tela de Pagamento - NexCommerce</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #1e1b4b;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 40px;
+    }
 
-        header {
-            background-color: #007bff;
-            color: white;
-            padding: 15px;
-            text-align: center;
-        }
+    h1 {
+        font-weight: 700;
+        color: #ff7b00;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+    }
 
-        main {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
+    .payment-wrapper {
+        display: flex;
+        gap: 40px;
+        background: white;
+        padding: 30px 40px;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        max-width: 900px;
+        width: 90%;
+        align-items: flex-start;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
 
-        .products {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-        }
+    /* Canvas do cartão */
+    #cardCanvas {
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        background: linear-gradient(135deg, #007bff, #00d4ff);
+        width: 350px;
+        height: 200px;
+        flex-shrink: 0;
+    }
 
-        .product {
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-            padding: 15px;
-            width: 200px;
-            text-align: center;
-        }
+    .payment-container {
+        width: 350px;
+        display: flex;
+        flex-direction: column;
+    }
 
-        .product img {
-            max-width: 100%;
-            height: 150px;
-            object-fit: contain;
-            margin-bottom: 10px;
-        }
+    .payment-container h2 {
+        margin-bottom: 20px;
+        color: #333;
+        text-align: center;
+    }
 
-        .product h3 {
-            font-size: 1.1rem;
-            margin: 10px 0 5px 0;
-        }
+    /* Opções de pagamento */
+    .payment-methods {
+        margin-bottom: 20px;
+        text-align: center;
+    }
 
-        .product p {
-            font-weight: bold;
-            color: #007bff;
-            margin: 0 0 10px 0;
-        }
+    .payment-methods label {
+        margin: 0 15px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #ff7b00;
+    }
 
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
+    input[type="radio"] {
+        margin-right: 8px;
+        cursor: pointer;
+    }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+    /* Formulário cartão */
+    form {
+        display: flex;
+        flex-direction: column;
+    }
 
-        #cart {
-            background: white;
-            padding: 15px;
-            margin-top: 30px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-        }
+    .form-group {
+        margin-bottom: 15px;
+    }
 
-        #cart h2 {
-            margin-top: 0;
-        }
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 6px;
+        color: #555;
+    }
 
-        #cart-items {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 15px;
-        }
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="month"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1.5px solid rgb(0, 0, 0);
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
 
-        #cart-items li {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    input[type="number"]:focus,
+    input[type="month"]:focus {
+        border-color: #007bff;
+        outline: none;
+    }
 
-        #cart-total {
-            font-weight: bold;
-            font-size: 1.2rem;
-            text-align: right;
+    .row {
+        display: flex;
+        gap: 20px;
+    }
+
+    .row .form-group {
+        flex: 1;
+    }
+
+    button {
+        width: 100%;
+        background-color: #1e1b4b;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #ff7b00;
+    }
+
+    /* Seção PIX */
+    .pix-section {
+        text-align: center;
+    }
+
+    #pixCanvas {
+        margin: 0 auto 15px auto;
+        display: block;
+        border: 2px solid #007bff;
+        border-radius: 10px;
+        background: white;
+        width: 180px;
+        height: 180px;
+    }
+
+    .pix-code-container {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #pixCode {
+        width: 220px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        padding: 8px;
+        border: 1.5px solid #ccc;
+        border-radius: 5px;
+        user-select: all;
+    }
+
+    #copyBtn {
+        background-color: #007bff;
+        border: none;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    #copyBtn:hover {
+        background-color: #0056b3;
+    }
+
+    /* Responsividade */
+    @media (max-width: 800px) {
+        .payment-wrapper {
+            flex-direction: column;
+            align-items: center;
         }
-    </style>
+        #cardCanvas, .payment-container {
+            width: 90%;
+        }
+    }
+
+</style>
 </head>
 <body>
-    <header>
-        <h1>Mini E-commerce</h1>
-    </header>
-    <main>
-        <section class="products" id="products"></section>
 
-        <section id="cart">
-            <h2>Carrinho</h2>
-            <ul id="cart-items"></ul>
-            <div id="cart-total">Total: R$ 0,00</div>
-        </section>
-    </main>
+<h1>NexCommerce</h1>
 
-    <script>
-        const products = [
-            {
-                id: 1,
-                name: "Camiseta Azul",
-                price: 49.90,
-                image: "https://via.placeholder.com/200x150?text=Camiseta+Azul"
-            },
-            {
-                id: 2,
-                name: "Calça Jeans",
-                price: 120.00,
-                image: "https://via.placeholder.com/200x150?text=Calça+Jeans"
-            },
-            {
-                id: 3,
-                name: "Tênis Esportivo",
-                price: 230.50,
-                image: "https://via.placeholder.com/200x150?text=Tênis+Esportivo"
-            },
-            {
-                id: 4,
-                name: "Boné Preto",
-                price: 35.00,
-                image: "https://via.placeholder.com/200x150?text=Boné+Preto"
+<div class="payment-wrapper">
+
+    <canvas id="cardCanvas" width="350" height="200"></canvas>
+
+    <div class="payment-container">
+        <h2>Pagamento</h2>
+
+        <div class="payment-methods">
+            <label><input type="radio" name="paymentMethod" value="card" checked /> Cartão de Crédito</label>
+            <label><input type="radio" name="paymentMethod" value="pix" /> Pix</label>
+        </div>
+
+        <!-- Formulário Cartão -->
+        <form id="paymentForm">
+            <div class="form-group">
+                <label for="cardName">Nome no Cartão</label>
+                <input type="text" id="cardName" placeholder="Nome completo" required />
+            </div>
+            <div class="form-group">
+                <label for="cardNumber">Número do Cartão</label>
+                <input type="tel" id="cardNumber" placeholder="1234 5678 9012 3456" pattern="[0-9\s]{13,19}" maxlength="19" required />
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="expiryDate">Validade</label>
+                    <input type="month" id="expiryDate" required />
+                </div>
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="number" id="cvv" placeholder="123" min="100" max="999" required />
+                </div>
+            </div>
+            <button type="submit">Pagar</button>
+        </form>
+
+        <!-- Seção PIX (oculta inicialmente) -->
+        <div class="pix-section" style="display:none;">
+            <canvas id="pixCanvas" width="180" height="180"></canvas>
+            <div class="pix-code-container">
+                <input type="text" id="pixCode" readonly value="00020126580014BR.GOV.BCB.PIX0114+55119999999990205Pagamento5204000053039865405100.005802BR5913NexCommerce6009São Paulo62070503***63041D3D" />
+                <button id="copyBtn" title="Copiar código Pix">Copiar</button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // Cartão canvas
+    const canvas = document.getElementById('cardCanvas');
+    const ctx = canvas.getContext('2d');
+    const nexCommerceRightPadding = 60;
+
+    function formatCardNumber(value) {
+        return value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
+    }
+
+    function drawCard(name, number, expiry) {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#007bff');
+        gradient.addColorStop(1, '#00d4ff');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'white';
+
+        ctx.font = '22px monospace';
+        ctx.fillText(number || '#### #### #### ####', 20, 100);
+
+        ctx.font = '18px Arial';
+        ctx.fillText(name.toUpperCase() || 'NOME DO TITULAR', 20, 150);
+
+        ctx.font = '16px Arial';
+        ctx.fillText(expiry || 'MM/AA', 20, 180);
+
+        const text = 'NexCommerce';
+        const textWidth = ctx.measureText(text).width;
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(text, canvas.width - textWidth - nexCommerceRightPadding, 40);
+    }
+
+    drawCard('', '', '');
+
+    // Atualiza cartão ao digitar
+    const cardNameInput = document.getElementById('cardName');
+    const cardNumberInput = document.getElementById('cardNumber');
+    const expiryDateInput = document.getElementById('expiryDate');
+
+    function updateCanvas() {
+        const name = cardNameInput.value || '';
+        let number = formatCardNumber(cardNumberInput.value);
+        let expiry = expiryDateInput.value;
+        if(expiry) {
+            const parts = expiry.split('-');
+            expiry = parts[1].slice(2) + '/' + parts[0].slice(2);
+        } else {
+            expiry = '';
+        }
+        drawCard(name, number, expiry);
+    }
+
+    cardNameInput.addEventListener('input', updateCanvas);
+    cardNumberInput.addEventListener('input', updateCanvas);
+    expiryDateInput.addEventListener('input', updateCanvas);
+
+    // Form submit cartão
+    const form = document.getElementById('paymentForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Pagamento com cartão processado com sucesso! 💳');
+        form.reset();
+        drawCard('', '', '');
+    });
+
+    // PIX canvas e código
+    const pixCanvas = document.getElementById('pixCanvas');
+    const pixCtx = pixCanvas.getContext('2d');
+
+    function drawPixQRCode(ctx) {
+        const size = pixCanvas.width;
+        ctx.clearRect(0, 0, size, size);
+
+        // Fundo branco
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, size, size);
+
+        // Padrão simples tipo QR code (preto e branco)
+        const blockSize = 18;
+        for(let y=0; y<size; y+=blockSize) {
+            for(let x=0; x<size; x+=blockSize) {
+                if((x/blockSize + y/blockSize) % 2 === 0) {
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(x, y, blockSize, blockSize);
+                }
             }
-        ];
-
-        const productsContainer = document.getElementById('products');
-        const cartItemsContainer = document.getElementById('cart-items');
-        const cartTotal = document.getElementById('cart-total');
-
-        let cart = [];
-
-        function formatPrice(price) {
-            return price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        function renderProducts() {
-            productsContainer.innerHTML = '';
-
-            products.forEach(product => {
-                const productDiv = document.createElement('div');
-                productDiv.className = 'product';
-
-                productDiv.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}">
-                    <h3>${product.name}</h3>
-                    <p>${formatPrice(product.price)}</p>
-                    <button data-id="${product.id}">Adicionar ao carrinho</button>
-                `;
-
-                productsContainer.appendChild(productDiv);
-            });
+        // Três grandes quadrados estilo QR code nos cantos
+        function drawCornerSquare(x, y) {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(x, y, blockSize*3, blockSize*3);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x + blockSize, y + blockSize, blockSize, blockSize);
         }
 
-        function renderCart() {
-            cartItemsContainer.innerHTML = '';
+        drawCornerSquare(0, 0);
+        drawCornerSquare(size - blockSize*3, 0);
+        drawCornerSquare(0, size - blockSize*3);
+    }
 
-            if(cart.length === 0) {
-                cartItemsContainer.innerHTML = '<li>Carrinho vazio.</li>';
-                cartTotal.textContent = 'Total: R$ 0,00';
-                return;
-            }
+    drawPixQRCode(pixCtx);
 
-            let total = 0;
+    // Alternar formas de pagamento
+    const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
+    const formCard = document.getElementById('paymentForm');
+    const pixSection = document.querySelector('.pix-section');
 
-            cart.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = `${item.name} x${item.quantity}`;
-                
-                const priceSpan = document.createElement('span');
-                priceSpan.textContent = formatPrice(item.price * item.quantity);
-
-                li.appendChild(priceSpan);
-                cartItemsContainer.appendChild(li);
-
-                total += item.price * item.quantity;
-            });
-
-            cartTotal.textContent = `Total: ${formatPrice(total)}`;
-        }
-
-        function addToCart(id) {
-            const product = products.find(p => p.id === id);
-            if(!product) return;
-
-            const cartItem = cart.find(item => item.id === id);
-
-            if(cartItem) {
-                cartItem.quantity++;
-            } else {
-                cart.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: 1
-                });
-            }
-
-            renderCart();
-        }
-
-        productsContainer.addEventListener('click', function(e) {
-            if(e.target.tagName === 'BUTTON') {
-                const id = parseInt(e.target.getAttribute('data-id'));
-                addToCart(id);
+    paymentRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if(radio.value === 'pix' && radio.checked) {
+                formCard.style.display = 'none';
+                pixSection.style.display = 'block';
+            } else if(radio.value === 'card' && radio.checked) {
+                pixSection.style.display = 'none';
+                formCard.style.display = 'flex';
             }
         });
+    });
 
-        // Inicializa a página
-        renderProducts();
-        renderCart();
-    </script>
+    // Botão copiar Pix
+    const copyBtn = document.getElementById('copyBtn');
+    const pixCodeInput = document.getElementById('pixCode');
+
+    copyBtn.addEventListener('click', () => {
+        pixCodeInput.select();
+        pixCodeInput.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(pixCodeInput.value).then(() => {
+            alert('Código Pix copiado para área de transferência!');
+        });
+    });
+</script>
+
 </body>
 </html>
